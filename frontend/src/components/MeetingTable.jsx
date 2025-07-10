@@ -40,8 +40,14 @@ const MeetingTable = () => {
       {/* Sticky Header */}
       <header className="sticky top-0 z-10 bg-white shadow-md py-4 px-6 border-b border-slate-200">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-blue-700">
-            📋 Meet Minute Maker
+          <h1 className="text-2xl font-bold text-blue-700 flex items-center">
+            <img
+              src="https://cdn-icons-png.flaticon.com/128/18366/18366442.png"
+              alt="Meet Minute Maker Logo"
+              width={20}
+              className="mr-2"
+            />
+            <p>Meet Minute Maker</p>
           </h1>
           <p className="text-sm text-gray-500">
             Your meeting summaries & insights hub
@@ -99,7 +105,9 @@ const MeetingTable = () => {
                     </a>
                   </td>
                   <td className="p-4 border-b border-slate-200 align-top">
-                    {meeting.captions.length}
+                    {meeting.captions.length == 0
+                      ? "-"
+                      : meeting.captions.length}
                   </td>
                   <td className="p-4 border-b border-slate-200 align-top">
                     {meeting.chat.length}

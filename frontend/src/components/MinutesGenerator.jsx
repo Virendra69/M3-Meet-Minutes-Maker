@@ -105,7 +105,7 @@ const MinutesGenerator = ({ meetingId, captions, chat }) => {
       {minutes ? (
         <button
           onClick={handleShow}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-fit"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-fit cursor-pointer"
         >
           Show Minutes
         </button>
