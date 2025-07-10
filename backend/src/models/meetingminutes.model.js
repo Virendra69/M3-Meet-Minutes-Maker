@@ -8,7 +8,7 @@ const MeetingMinutes = sequelize.define(
     meetingId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      unique: true,
+      forignKey: true,
     },
     content: {
       type: DataTypes.TEXT("long"),
