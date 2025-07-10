@@ -1,5 +1,6 @@
 const Meeting = require("../models/meeting.model");
 const MeetingMinutes = require("../models/meetingminutes.model");
+const GeminiChat = require("../models/geminichats.model");
 const { GoogleGenAI } = require("@google/genai");
 
 const ai = new GoogleGenAI({});
@@ -137,10 +138,69 @@ const getMinutes = async (req, res) => {
   }
 };
 
+const askGeminiAboutMinutes = async (req, res) => {
+  const { question, minutes } = req.body;
+
+  if (!question || !minutes) {
+    return res
+      .status(400)
+      .json({ error: "Both 'question' and 'minutes' are required." });
+  }
+
+  try {
+    // const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    const prompt = `
+You are an assistant that answers questions based on meeting minutes. 
+Here are the minutes of the meeting:\n\n${minutes}
+
+User's question: ${question}
+`;
+
+    const result = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+    // const result = await model.generateContent(prompt);
+    const response = result.text;
+
+    res.json({ answer: response });
+  } catch (error) {
+    console.error("Gemini API error:", error);
+    res.status(500).json({ error: "Failed to generate answer from Gemini." });
+  }
+};
+
+const saveChat = async (req, res) => {
+  const { meetingId, role, message } = req.body;
+  try {
+    const saved = await GeminiChat.create({ meetingId, role, message });
+    res.status(201).json({ success: true, chat: saved });
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Failed to save chat." });
+  }
+};
+
+const getChats = async (req, res) => {
+  const { meetingId } = req.query;
+  try {
+    const chats = await GeminiChat.findAll({
+      where: { meetingId: meetingId },
+      order: [["createdAt", "ASC"]],
+    });
+    res.status(200).json({ success: true, chats });
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Failed to fetch chats." });
+  }
+};
+
 module.exports = {
   captureText,
   getAllMeetings,
   generateMinutes,
   saveMinutes,
   getMinutes,
+  askGeminiAboutMinutes,
+  saveChat,
+  getChats,
 };
