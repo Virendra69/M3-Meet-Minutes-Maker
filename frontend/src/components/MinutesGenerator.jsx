@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
-import MeetingMinutesViewer from "./MeetingMinutesViewer";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const MinutesGenerator = ({ meetingId, captions, chat }) => {
   const [minutes, setMinutes] = useState(null); // stores minutes (either from db or Gemini)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showViewer, setShowViewer] = useState(false); // controls visibility of minutes
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkExistingMinutes = async () => {
@@ -17,7 +17,7 @@ const MinutesGenerator = ({ meetingId, captions, chat }) => {
         );
         const data = await res.json();
         if (res.ok && data.minutes) {
-          setMinutes(data.minutes); // store it, but don't show yet
+          setMinutes(data.minutes); // store it
         }
       } catch (err) {
         console.error("Error checking existing minutes:", err);
@@ -30,7 +30,6 @@ const MinutesGenerator = ({ meetingId, captions, chat }) => {
     setLoading(true);
     setError("");
     setMinutes(null);
-    setShowViewer(false);
 
     let parsedCaptions = captions;
     let parsedChat = chat;
@@ -53,27 +52,33 @@ const MinutesGenerator = ({ meetingId, captions, chat }) => {
     }
 
     try {
-      const res = await fetch(`${
-            import.meta.env.VITE_BACKEND_BASE_URL
-          }/generate-minutes`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ captions: parsedCaptions, chat: parsedChat }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/generate-minutes`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ captions: parsedCaptions, chat: parsedChat }),
+        }
+      );
 
       const data = await res.json();
 
       if (res.ok && data.minutes) {
         setMinutes(data.minutes);
-        setShowViewer(true); // auto-show after generating
 
         // Save to DB
-        await fetch(`${
-            import.meta.env.VITE_BACKEND_BASE_URL
-          }/save-minutes`, {
+        await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/save-minutes`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ meetingId, content: data.minutes }),
+        });
+
+        // Navigate to full view
+        navigate("/minutes-chat", {
+          state: {
+            minutes: data.minutes,
+            meetingId,
+          },
         });
       } else {
         setError(data.error || "Failed to generate minutes.");
@@ -86,18 +91,23 @@ const MinutesGenerator = ({ meetingId, captions, chat }) => {
     setLoading(false);
   };
 
-  const toggleViewer = () => {
-    setShowViewer((prev) => !prev);
+  const handleShow = () => {
+    navigate("/minutes-chat", {
+      state: {
+        minutes,
+        meetingId,
+      },
+    });
   };
 
   return (
     <div className="flex flex-col gap-3">
       {minutes ? (
         <button
-          onClick={toggleViewer}
+          onClick={handleShow}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-fit"
         >
-          {showViewer ? "Hide Minutes" : "Show Minutes"}
+          Show Minutes
         </button>
       ) : (
         <button
@@ -116,13 +126,6 @@ const MinutesGenerator = ({ meetingId, captions, chat }) => {
       {error && (
         <div className="text-red-600 border border-red-200 bg-red-50 px-3 py-2 rounded">
           {error}
-        </div>
-      )}
-
-      {showViewer && minutes && (
-        <div className="bg-gray-50 p-4 border-l-4 border-blue-600 text-black rounded">
-          <strong className="block mb-2">Minutes:</strong>
-          <MeetingMinutesViewer content={minutes} />
         </div>
       )}
     </div>

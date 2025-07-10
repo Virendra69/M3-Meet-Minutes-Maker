@@ -29,76 +29,94 @@ const MeetingTable = () => {
 
   if (loading) {
     return (
-      <div className="text-center text-lg font-medium text-gray-600">
+      <div className="text-center text-lg font-medium text-gray-600 mt-20">
         Loading meetings...
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4">
-      <h2 className="text-4xl font-semibold text-center mb-6 text-black">
-        Meeting Records
-      </h2>
+    <div className="min-h-screen bg-gray-100 pb-12 w-full">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-10 bg-white shadow-md py-4 px-6 border-b border-slate-200">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-blue-700">
+            📋 Meet Minute Maker
+          </h1>
+          <p className="text-sm text-gray-500">
+            Your meeting summaries & insights hub
+          </p>
+        </div>
+      </header>
 
-      <div className="bg-white rounded-xl shadow-lg overflow-x-auto">
-        <table className="w-full min-w-[600px] border-collapse">
-          <thead>
-            <tr className="bg-slate-50 text-black">
-              <th className="p-4 text-left font-semibold border-b border-slate-200">
-                Title
-              </th>
-              <th className="p-4 text-left font-semibold border-b border-slate-200">
-                URL
-              </th>
-              <th className="p-4 text-left font-semibold border-b border-slate-200">
-                Captions
-              </th>
-              <th className="p-4 text-left font-semibold border-b border-slate-200">
-                Chats
-              </th>
-              <th className="p-4 text-left font-semibold border-b border-slate-200">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {meetings.map((meeting) => (
-              <tr
-                key={meeting.id}
-                className="hover:bg-slate-100 text-black transition-colors"
-              >
-                <td className="p-4 border-b border-slate-200 align-top">
-                  {meeting.title}
-                </td>
-                <td className="p-4 border-b border-slate-200 align-top">
-                  <a
-                    href={meeting.meetUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    {meeting.meetUrl}
-                  </a>
-                </td>
-                <td className="p-4 border-b border-slate-200 align-top">
-                  {meeting.captions.length}
-                </td>
-                <td className="p-4 border-b border-slate-200 align-top">
-                  {meeting.chat.length}
-                </td>
-                <td className="p-4 border-b border-slate-200 align-top">
-                  <MinutesGenerator
-                    meetingId={meeting.id}
-                    captions={safeParse(meeting.captions)}
-                    chat={safeParse(meeting.chat)}
-                  />
-                </td>
+      {/* Main Section */}
+      <main className="max-w-6xl mx-auto px-4 mt-10">
+        <h2 className="text-3xl font-semibold text-center text-black mb-2">
+          Meeting Records
+        </h2>
+        <p className="text-center text-gray-500 mb-6">
+          Access your meeting data, generate summaries, and chat with Gemini.
+        </p>
+
+        <div className="bg-white rounded-xl shadow-lg overflow-x-auto">
+          <table className="w-full min-w-[600px] border-collapse">
+            <thead>
+              <tr className="bg-slate-50 text-black">
+                <th className="p-4 text-left font-semibold border-b border-slate-200">
+                  Title
+                </th>
+                <th className="p-4 text-left font-semibold border-b border-slate-200">
+                  URL
+                </th>
+                <th className="p-4 text-left font-semibold border-b border-slate-200">
+                  Captions
+                </th>
+                <th className="p-4 text-left font-semibold border-b border-slate-200">
+                  Chats
+                </th>
+                <th className="p-4 text-left font-semibold border-b border-slate-200">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {meetings.map((meeting) => (
+                <tr
+                  key={meeting.id}
+                  className="hover:bg-slate-100 text-black transition-colors"
+                >
+                  <td className="p-4 border-b border-slate-200 align-top">
+                    {meeting.title}
+                  </td>
+                  <td className="p-4 border-b border-slate-200 align-top">
+                    <a
+                      href={meeting.meetUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      {meeting.meetUrl}
+                    </a>
+                  </td>
+                  <td className="p-4 border-b border-slate-200 align-top">
+                    {meeting.captions.length}
+                  </td>
+                  <td className="p-4 border-b border-slate-200 align-top">
+                    {meeting.chat.length}
+                  </td>
+                  <td className="p-4 border-b border-slate-200 align-top">
+                    <MinutesGenerator
+                      meetingId={meeting.id}
+                      captions={safeParse(meeting.captions)}
+                      chat={safeParse(meeting.chat)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
     </div>
   );
 };
