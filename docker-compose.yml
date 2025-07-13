@@ -1,0 +1,33 @@
+services:
+  backend:
+    build: ./backend
+    container_name: backend
+    restart: always
+    networks:
+      - m3
+    environment:
+      DB_HOST: DB_HOST
+      DB_PORT: DB_PORT
+      DB_NAME: DB_NAME
+      DB_USER: DB_USER
+      DB_PASSWORD: DB_PASSWORD
+      GEMINI_API_KEY: GEMINI_API_KEY
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    restart: always
+    networks:
+      - m3
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_BACKEND_BASE_URL: http://localhost:5000/api
+    depends_on:
+      - backend
+
+networks:
+  m3:
+    external: true
