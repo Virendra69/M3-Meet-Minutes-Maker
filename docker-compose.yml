@@ -30,4 +30,4 @@ services:
 
 networks:
   m3:
-    external: true
+    driver: bridge
