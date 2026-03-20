@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const MinutesGenerator = ({ meetingId, captions, chat }) => {
   const [minutes, setMinutes] = useState(null); // stores minutes (either from db or Gemini)
@@ -10,14 +11,11 @@ const MinutesGenerator = ({ meetingId, captions, chat }) => {
   useEffect(() => {
     const checkExistingMinutes = async () => {
       try {
-        const res = await fetch(
-          `${
-            import.meta.env.VITE_BACKEND_BASE_URL
-          }/get-minutes/?meetingId=${meetingId}`
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_BASE_URL}/get-minutes/?meetingId=${meetingId}`
         );
-        const data = await res.json();
-        if (res.ok && data.minutes) {
-          setMinutes(data.minutes); // store it
+        if (res.data.minutes) {
+          setMinutes(res.data.minutes); // store it
         }
       } catch (err) {
         console.error("Error checking existing minutes:", err);
@@ -39,7 +37,7 @@ const MinutesGenerator = ({ meetingId, captions, chat }) => {
         ? captions
         : JSON.parse(captions);
       parsedChat = Array.isArray(chat) ? chat : JSON.parse(chat);
-    } catch (e) {
+    } catch {
       setError("Captions or chat data is not valid JSON.");
       setLoading(false);
       return;
@@ -52,36 +50,29 @@ const MinutesGenerator = ({ meetingId, captions, chat }) => {
     }
 
     try {
-      const res = await fetch(
+      const res = await axios.post(
         `${import.meta.env.VITE_BACKEND_BASE_URL}/generate-minutes`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ captions: parsedCaptions, chat: parsedChat }),
-        }
+        { captions: parsedCaptions, chat: parsedChat }
       );
 
-      const data = await res.json();
-
-      if (res.ok && data.minutes) {
-        setMinutes(data.minutes);
+      if (res.data.minutes) {
+        setMinutes(res.data.minutes);
 
         // Save to DB
-        await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/save-minutes`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ meetingId, content: data.minutes }),
-        });
+        await axios.post(
+          `${import.meta.env.VITE_BACKEND_BASE_URL}/save-minutes`,
+          { meetingId, content: res.data.minutes }
+        );
 
         // Navigate to full view
         navigate("/minutes-chat", {
           state: {
-            minutes: data.minutes,
+            minutes: res.data.minutes,
             meetingId,
           },
         });
       } else {
-        setError(data.error || "Failed to generate minutes.");
+        setError(res.data.error || "Failed to generate minutes.");
       }
     } catch (err) {
       console.error("Error generating minutes:", err);
@@ -133,3 +124,4 @@ const MinutesGenerator = ({ meetingId, captions, chat }) => {
 };
 
 export default MinutesGenerator;
+

@@ -18,12 +18,13 @@ const GeminiChat = ({ minutes, meetingId }) => {
     const fetchChats = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/get-chats/?meetingId=${meetingId}`
+          `${import.meta.env.VITE_BACKEND_BASE_URL}/get-chats/?meetingId=${meetingId}`
         );
         if (res.data.success) {
-          const chatMessages = res.data.chats.map((msg) => ({
+          const chatMessages = res.data.chats.map((msg, idx) => ({
             role: msg.role,
             text: msg.message,
+            id: `history-${idx}-${msg.role}`,
           }));
           setMessages(chatMessages);
         }
@@ -38,13 +39,13 @@ const GeminiChat = ({ minutes, meetingId }) => {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const newMessages = [...messages, { role: "user", text: input }];
+    const newMessages = [...messages, { role: "user", text: input, id: `${Date.now()}-user` }];
     setMessages(newMessages);
     setLoading(true);
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/ask-gemini-about-minutes",
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/ask-gemini-about-minutes`,
         {
           minutes,
           question: input,
@@ -52,11 +53,11 @@ const GeminiChat = ({ minutes, meetingId }) => {
       );
 
       const reply = res.data.answer;
-      const updatedMessages = [...newMessages, { role: "gemini", text: reply }];
+      const updatedMessages = [...newMessages, { role: "gemini", text: reply, id: `${Date.now()}-gemini` }];
       setMessages(updatedMessages);
 
       // Save user and Gemini messages to DB
-      await axios.post("http://localhost:5000/api/save-chat", {
+      await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/save-chat`, {
         meetingId,
         role: "user",
         message: input,
@@ -83,9 +84,9 @@ const GeminiChat = ({ minutes, meetingId }) => {
     <div className="h-screen flex flex-col p-4 overflow-hidden">
       {/* Chat Window (fixed height, scrollable) */}
       <div className="flex-1 min-h-0 overflow-y-auto border rounded p-3 bg-gray-50 mb-3">
-        {messages.map((msg, idx) => (
+        {messages.map((msg) => (
           <div
-            key={idx}
+            key={msg.id}
             className={`mb-3 ${
               msg.role === "user" ? "text-right" : "text-left"
             }`}
@@ -119,6 +120,8 @@ const GeminiChat = ({ minutes, meetingId }) => {
       <div className="flex gap-2">
         <input
           type="text"
+          id="gemini-chat-input"
+          aria-label="Ask a question about the meeting minutes"
           className="flex-grow border rounded px-3 py-2"
           placeholder="Ask something about the minutes..."
           value={input}
@@ -126,6 +129,8 @@ const GeminiChat = ({ minutes, meetingId }) => {
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
         <button
+          id="gemini-send-btn"
+          aria-label="Send message"
           className={`px-4 py-2 rounded text-white ${
             loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600"
           }`}

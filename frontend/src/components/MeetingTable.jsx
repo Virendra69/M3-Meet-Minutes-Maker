@@ -29,8 +29,39 @@ const MeetingTable = () => {
 
   if (loading) {
     return (
-      <div className="text-center text-lg font-medium text-gray-600 mt-20">
-        Loading meetings...
+      <div className="min-h-screen bg-gray-100 pb-12 w-full">
+        <header className="sticky top-0 z-10 bg-white shadow-md py-4 px-6 border-b border-slate-200">
+          <div className="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-blue-700 flex items-center">
+              <img
+                src="https://cdn-icons-png.flaticon.com/128/18366/18366442.png"
+                alt="Meet Minute Maker Logo"
+                width={20}
+                className="mr-2"
+              />
+              <p>Meet Minute Maker</p>
+            </h1>
+            <p className="text-sm text-gray-500">
+              Your meeting summaries & insights hub
+            </p>
+          </div>
+        </header>
+        <main className="max-w-6xl mx-auto px-4 mt-10">
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="flex gap-4 py-4 border-b border-slate-100 animate-pulse"
+              >
+                <div className="h-4 bg-gray-200 rounded w-1/4" />
+                <div className="h-4 bg-gray-200 rounded w-1/3" />
+                <div className="h-4 bg-gray-200 rounded w-16" />
+                <div className="h-4 bg-gray-200 rounded w-16" />
+                <div className="h-4 bg-gray-200 rounded w-24" />
+              </div>
+            ))}
+          </div>
+        </main>
       </div>
     );
   }
@@ -65,7 +96,7 @@ const MeetingTable = () => {
         </p>
 
         <div className="bg-white rounded-xl shadow-lg overflow-x-auto">
-          <table className="w-full min-w-[600px] border-collapse">
+          <table className="w-full min-w-[600px] border-collapse" aria-label="Meetings list">
             <thead>
               <tr className="bg-slate-50 text-black">
                 <th className="p-4 text-left font-semibold border-b border-slate-200">
