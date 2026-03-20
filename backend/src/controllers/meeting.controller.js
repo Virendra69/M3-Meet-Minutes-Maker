@@ -1,6 +1,4 @@
-const Meeting = require("../models/meeting.model");
-const MeetingMinutes = require("../models/meetingminutes.model");
-const GeminiChat = require("../models/geminichats.model");
+const { Meeting, MeetingMinutes, GeminiChat } = require("../models");
 const { GoogleGenAI } = require("@google/genai");
 
 const ai = new GoogleGenAI({});
